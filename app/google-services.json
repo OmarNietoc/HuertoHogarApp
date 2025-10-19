@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "418408959061",
+    "project_id": "myapp-3e9b0",
+    "storage_bucket": "myapp-3e9b0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418408959061:android:f094bddbb30915b66618dc",
+        "android_client_info": {
+          "package_name": "cl.duocuc.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDykABkfHz4BHkjHe1vLyZE0GfKhrHlYb0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
