@@ -11,13 +11,13 @@ data class Producto(
     val categoria: String,
     val descripcion: String
 )
-/*
+
 val productosDemo = listOf(
     Producto(
         id = 1,
         titulo = "Bombones de chocolate",
         precio = "1.500 (1kg)",
-        imagenRes = R.drawable.dchocolate,
+        imagenRes = R.drawable.milk,
         categoria = "Dulces",
         descripcion = "Aca se describe el producto"
     ),
@@ -25,7 +25,7 @@ val productosDemo = listOf(
         id = 2,
         titulo = "Pastel de chocolate",
         precio = "20.000",
-        imagenRes = R.drawable.pchocolate,
+        imagenRes = R.drawable.apples,
         categoria = "Pasteles",
         descripcion = "Aca se describe el producto"
     ),
@@ -33,7 +33,7 @@ val productosDemo = listOf(
         id = 3,
         titulo = "Pie de limón",
         precio = "18.000",
-        imagenRes = R.drawable.plimon,
+        imagenRes = R.drawable.bananas,
         categoria = "Pasteles",
         descripcion = "Aca se describe el producto"
     ),
@@ -41,7 +41,7 @@ val productosDemo = listOf(
         id = 4,
         titulo = "Bombones de chocolate 2",
         precio = "3.500 (1kg)",
-        imagenRes = R.drawable.dchocolate,
+        imagenRes = R.drawable.carrots,
         categoria = "Dulces",
         descripcion = "Aca se describe el producto"
     ),
@@ -49,7 +49,7 @@ val productosDemo = listOf(
         id = 5,
         titulo = "Pastel de chocolate 2",
         precio = "25.000",
-        imagenRes = R.drawable.pchocolate,
+        imagenRes = R.drawable.peppers,
         categoria = "Pasteles",
         descripcion = "Aca se describe el producto"
     ),
@@ -57,8 +57,8 @@ val productosDemo = listOf(
         id = 6,
         titulo = "Pie de limón 2",
         precio = "20.000",
-        imagenRes = R.drawable.plimon,
+        imagenRes = R.drawable.quinoa,
         categoria = "Pasteles",
         descripcion = "Aca se describe el producto"
     ),
-)*/
+)

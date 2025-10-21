@@ -1,10 +1,16 @@
-package cl.duocuc.app.ui.viewmodel
+package cl.duocuc.app.ui.vmfactory
 
+
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import cl.duocuc.app.data.local.AppDatabase
 import cl.duocuc.app.data.media.MediaRepository
+import cl.duocuc.app.repository.RecordatorioRepository
 import cl.duocuc.app.repository.auth.FirebaseAuthDataSource
 import cl.duocuc.app.ui.profile.ProfileViewModel
+import cl.duocuc.app.ui.recordatorio.RecordatorioViewModel
+
 
 class ProfileVMFactory(
     private val authDs: FirebaseAuthDataSource,
