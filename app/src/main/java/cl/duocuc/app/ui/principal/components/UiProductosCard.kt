@@ -1,8 +1,6 @@
 package cl.duocuc.app.ui.principal.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,12 +8,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import cl.duocuc.app.model.Producto
 
 @Composable
@@ -28,7 +29,7 @@ fun UiProductosCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(320.dp),
+            .height(340.dp),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -37,39 +38,55 @@ fun UiProductosCard(
                 .fillMaxSize()
                 .padding(12.dp)
         ) {
+
             Image(
                 painter = painterResource(producto.imagenRes),
-                contentDescription = producto.titulo,
+                contentDescription = producto.nombre,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
+                    .height(150.dp),
                 contentScale = ContentScale.Crop
             )
 
             Spacer(Modifier.height(8.dp))
 
+
+            producto.oferta?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+
+
             Text(
-                text = producto.titulo,
-                style = MaterialTheme.typography.titleMedium,
+                text = producto.nombre,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+
+
             Text(
-                text = producto.categoria,
+                text = producto.categoria.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(Modifier.height(4.dp))
 
+
             Text(
-                text = "Valor: ${producto.precio}",
-                style = MaterialTheme.typography.bodyMedium
+                text = "$${producto.precio} / ${producto.unid}",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
             )
+
+            Spacer(Modifier.height(8.dp))
 
             Spacer(Modifier.weight(1f))
 
-            // --- Animaciones del botón ---
+
             val interactionSource = remember { MutableInteractionSource() }
             val presionado by interactionSource.collectIsPressedAsState()
 
@@ -101,10 +118,10 @@ fun UiProductosCard(
                         scaleX = escala
                         scaleY = escala
                     }
-                    .animateContentSize() // suaviza el cambio de texto
+                    .animateContentSize()
             ) {
                 Text(
-                    if (agregado) "Agregado" else "Agregar al carrito",
+                    if (agregado) "Agregado ✅" else "Agregar al carrito",
                     style = MaterialTheme.typography.labelLarge
                 )
             }
