@@ -74,9 +74,19 @@ fun RecuperarPasswordScreen(
             ) {
                 OutlinedTextField(
                     value = email, onValueChange = { email = it },
-                    label = { Text("Correo electrónico",color=GrisOscuro) }, singleLine = true,
+                    placeholder = { Text("Correo electrónico",color=GrisOscuro) }, singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
                 )
 
                 if (errorMsg != null) {

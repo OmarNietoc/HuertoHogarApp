@@ -12,7 +12,8 @@ data class Producto(
     val categoria: String,
     @DrawableRes val imagenRes: Int,
     val unid: String,
-    val oferta: String? = null
+    val oferta: String? = null,
+    var favorito: Boolean = false
 )
 
 val productosDemo = listOf(

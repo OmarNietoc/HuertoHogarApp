@@ -1,6 +1,6 @@
-package cl.duocuc.app.model.mappers
+package cl.duocuc.app.data.mappers
 
-import cl.duocuc.app.data.local.RecordatorioEntity
+import cl.duocuc.app.data.local.recordatorio.RecordatorioEntity
 import cl.duocuc.app.model.Recordatorio
 
 fun RecordatorioEntity.toDto() = Recordatorio(

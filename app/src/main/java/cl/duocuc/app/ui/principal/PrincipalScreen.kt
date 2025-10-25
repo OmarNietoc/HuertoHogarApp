@@ -22,6 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -34,13 +36,19 @@ import cl.duocuc.app.ui.profile.ProfileViewModel
 import cl.duocuc.app.repository.auth.FirebaseAuthDataSource
 import cl.duocuc.app.data.media.MediaRepository
 import cl.duocuc.app.ui.principal.components.UiProductosCard
+import cl.duocuc.app.ui.recordatorio.RecordatorioScreen
+import cl.duocuc.app.ui.recordatorio.RecordatorioViewModel
 import cl.duocuc.app.ui.vmfactory.RecordatorioVMFactory
 import cl.duocuc.app.ui.vmfactory.ProfileVMFactory
+import com.google.firebase.auth.FirebaseAuth
+import cl.duocuc.app.data.repository.ProductoRepository
+import cl.duocuc.app.data.local.AppDatabase
+import kotlinx.coroutines.launch
 // --- Bottom items ---
 sealed class BottomItem(
     val route: String,
     val title: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val icon: ImageVector,
     val badge: Int? = null
 ) {
     data object Home : BottomItem("home", "Inicio", Icons.Outlined.Home)
@@ -104,12 +112,20 @@ private fun BottomBar(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PrincipalScreen(
+    email: String,
     onLogout: () -> Unit = {},
     vm: PrincipalViewModel = viewModel()
+
 ) {
     val state by vm.ui.collectAsState()
     val categoriaSel by vm.categoriaSel.collectAsState()
     val productos by vm.productosFiltrados.collectAsState()
+
+
+    val context = LocalContext.current
+    val db = remember { AppDatabase.get(context) }
+    val productoRepository = remember { ProductoRepository(db) }
+    val scope = rememberCoroutineScope()
 
     var expanded by remember { mutableStateOf(false) }
     val tabsNav = rememberNavController()
@@ -183,7 +199,7 @@ fun PrincipalScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    val saludo = "Hola ${state.email ?: "usuario"}"
+                    val saludo = "Hola ${email}"
                     Text(saludo, style = MaterialTheme.typography.headlineSmall)
                     Text("Bienvenido a tu pantalla principal.")
 
@@ -201,7 +217,6 @@ fun PrincipalScreen(
                             )
                         }
                     }
-
                     // Grilla de productos
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(minSize = 180.dp),
@@ -219,22 +234,49 @@ fun PrincipalScreen(
                             ) {
                                 UiProductosCard(
                                     producto = producto,
-                                    onAgregar = {
-                                        // TODO: vm.agregarAlCarrito(producto.id)
+                                    onAgregar = { /* Navegar al detalle */ },
+                                    onToggleFavorito = {
+                                        // 🔹 Aquí creamos el nuevo producto con favorito toggled
+                                        val nuevoProducto = producto.copy(favorito = !producto.favorito)
+
+                                        // 🔹 Ejecutamos repo + ViewModel en coroutine
+                                        scope.launch {
+                                            productoRepository.toggleFavorito(nuevoProducto)
+                                            vm.actualizarProductoFavorito(nuevoProducto)
+                                        }
                                     }
                                 )
                             }
                         }
                     }
+
                 }
             }
 
             // FAVORITOS
             composable(BottomItem.Favs.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Favoritos")
+
+                val todos by vm.todosProductos.collectAsState()
+                val soloFavoritos = todos.filter { it.favorito }
+
+
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 180.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(soloFavoritos, key = { it.id }) { producto ->
+                        UiProductosCard(
+                            producto = producto,
+                            onAgregar = { /* carrito */ },
+                            onToggleFavorito = { vm.actualizarProductoFavorito(producto.copy(favorito = !producto.favorito)) }
+                        )
+                    }
                 }
             }
+
+
 
             // CARRITO
             composable(BottomItem.Cart.route) {
@@ -245,18 +287,18 @@ fun PrincipalScreen(
 
             // AGENDA
             composable(BottomItem.Agenda.route) {
-                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
                 if (uid == null) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Debes iniciar sesión para ver tus recordatorios.")
                     }
                 } else {
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return@composable
+                    val context = LocalContext.current
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@composable
 
                     val factory = remember(uid) { RecordatorioVMFactory(context, uid) }
-                    val rvm: cl.duocuc.app.ui.recordatorio.RecordatorioViewModel = viewModel(factory = factory)
-                    cl.duocuc.app.ui.recordatorio.RecordatorioScreen(rvm)
+                    val rvm: RecordatorioViewModel = viewModel(factory = factory)
+                    RecordatorioScreen(rvm)
                 }
             }
 

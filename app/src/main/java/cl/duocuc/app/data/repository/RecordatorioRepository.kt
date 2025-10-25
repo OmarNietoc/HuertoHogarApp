@@ -1,9 +1,9 @@
 package cl.duocuc.app.repository
 
-import cl.duocuc.app.data.local.ReminderDao
+import cl.duocuc.app.data.local.recordatorio.ReminderDao
 import cl.duocuc.app.model.Recordatorio
-import cl.duocuc.app.model.mappers.toDto
-import cl.duocuc.app.model.mappers.toEntity
+import cl.duocuc.app.data.mappers.toDto
+import cl.duocuc.app.data.mappers.toEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

@@ -14,9 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import cl.duocuc.app.model.Recordatorio
+import cl.duocuc.app.ui.theme.GrisOscuro
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,16 +36,25 @@ fun RecordatorioScreen(vm: RecordatorioViewModel) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Recordatorios", style = MaterialTheme.typography.headlineSmall)
-        Text("Usuario: ${state.uid}")
 
         // Formulario
         OutlinedTextField(
             value = state.mensaje,
             onValueChange = vm::onMensajeChange,
-            label = { Text("Mensaje") },
+            placeholder = { Text("Mensaje") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = false,
-            minLines = 2
+            minLines = 2,
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = GrisOscuro,
+                unfocusedTextColor = GrisOscuro,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.White,
+                unfocusedIndicatorColor = Color.White,
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color.White
+            )
         )
 
         Row(

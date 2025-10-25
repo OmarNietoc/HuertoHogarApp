@@ -1,6 +1,7 @@
 package cl.duocuc.app.ui.home
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,8 +12,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cl.duocuc.app.R
 import cl.duocuc.app.ui.home.components.AnimatedLogo
-import cl.duocuc.app.ui.home.components.RepeatingBackground
 import androidx.compose.ui.graphics.Color
+import cl.duocuc.app.ui.theme.VerdeEsmeralda
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +58,14 @@ private fun HomeContent(
                 .height(140.dp)
         )
         Text("¡Bienvenido!",style=MaterialTheme.typography.headlineMedium)
-        Button(onClick = onLoginClick) { Text("Login") }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = onRegisterClick) { Text("Registrarse") }
-            TextButton(onClick = onRecoverClick) { Text("Recuperar contraseña") }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = onLoginClick) { Text("Login") }
+            Button(onClick = onRegisterClick , colors = ButtonDefaults.buttonColors(containerColor = Color.White)) { Text("Registrarse",color = VerdeEsmeralda) }
+            Button(onClick = onRecoverClick , colors = ButtonDefaults.buttonColors(containerColor = Color.White)) { Text("Recuperar contraseña",color = VerdeEsmeralda) }
         }
     }
 }

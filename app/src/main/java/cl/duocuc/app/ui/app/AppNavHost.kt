@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,14 +18,15 @@ import cl.duocuc.app.ui.principal.PrincipalScreen
 import cl.duocuc.app.ui.register.RegistrarseScreen
 import cl.duocuc.app.ui.recover.RecuperarPasswordScreen
 import androidx.compose.ui.graphics.drawscope.withTransform
-import cl.duocuc.app.ui.home.components.RepeatingBackground
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavHost() {
     val nav = rememberNavController()
 
-    RepeatingBackground {
+    BackgroundImage {
 
         // NavHost con tus composables encima del fondo
         NavHost(navController = nav, startDestination = Route.HomeRoot.path) {
@@ -41,13 +41,22 @@ fun AppNavHost() {
             composable(Route.Login.path) {
                 LoginScreen(
                     onBack = { nav.popBackStack() },
-                    onLoginSuccess = {
-                        nav.navigate(Route.Principal.path) { launchSingleTop = true }
+                    onLoginSuccess = { email ->
+                        nav.navigate("${Route.Principal.path}/$email") {
+                            launchSingleTop = true
+                            popUpTo(Route.HomeRoot.path) { inclusive = true }
+                        }
                     }
                 )
             }
-            composable(Route.Principal.path) {
+            composable(
+                route = "${Route.Principal.path}/{email}",
+                arguments = listOf(navArgument("email") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val email = backStackEntry.arguments?.getString("email") ?: ""
+
                 PrincipalScreen(
+                    email = email,
                     onLogout = {
                         nav.navigate(Route.HomeRoot.path) {
                             popUpTo(Route.HomeRoot.path) { inclusive = true }
@@ -79,5 +88,5 @@ fun AppNavHost() {
                 )
             }
         }
-    }
+   }
 }

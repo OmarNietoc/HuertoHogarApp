@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class PrincipalUiState(
-    val email: String? = "usuario@demo.com",
+    val email: String? = null,
     val loading: Boolean = false,
     val error: String? = null,
     val loggedOut: Boolean = false
@@ -19,14 +19,19 @@ data class PrincipalUiState(
 
 class PrincipalViewModel : ViewModel() {
 
+    // ---------- Fuente mutable ----------
+    private val fuente: List<Producto> = productosDemo
+    private val _fuenteMutable = MutableStateFlow(fuente)  // la fuente "inmutable" original queda aquí
+    private val fuenteFlow: StateFlow<List<Producto>> = _fuenteMutable.asStateFlow()
+    val todosProductos: StateFlow<List<Producto>> = _fuenteMutable.asStateFlow()
+
+    // ---------- Categorías ----------
+    val categorias: List<String> = listOf("Todos") +
+            _fuenteMutable.value.map { it.categoria }.distinct()
+
     // ---------- Estado general ----------
     private val _ui = MutableStateFlow(PrincipalUiState())
     val ui: StateFlow<PrincipalUiState> = _ui.asStateFlow()
-
-    // ---------- Fuente y filtros ----------
-    private val fuente: List<Producto> = productosDemo
-
-    val categorias: List<String> = listOf("Todos") + fuente.map { it.categoria }.distinct()
 
     private val _categoriaSel = MutableStateFlow("Todos")
     val categoriaSel: StateFlow<String> = _categoriaSel.asStateFlow()
@@ -40,7 +45,6 @@ class PrincipalViewModel : ViewModel() {
         aplicarFiltro()
     }
 
-    /** Carga/recarga la grilla (desde productosDemo). */
     fun cargarProductos() {
         viewModelScope.launch {
             _ui.value = _ui.value.copy(loading = true, error = null)
@@ -54,7 +58,14 @@ class PrincipalViewModel : ViewModel() {
         }
     }
 
-    /** Reset al tocar Inicio: categoría base + recarga. */
+    fun actualizarProductoFavorito(producto: Producto) {
+        // 🔹 actualizar mutable
+        _fuenteMutable.value = _fuenteMutable.value.map {
+            if (it.id == producto.id) producto else it
+        }
+        aplicarFiltro()
+    }
+
     fun refreshHome() {
         _categoriaSel.value = "Todos"
         cargarProductos()
@@ -63,18 +74,16 @@ class PrincipalViewModel : ViewModel() {
     fun logout() {
         _ui.value = _ui.value.copy(loading = true)
         viewModelScope.launch {
-            // Tu lógica real de logout iría aquí
             _ui.value = _ui.value.copy(loading = false, loggedOut = true)
         }
     }
 
-    // ---------- Helper ----------
     private fun aplicarFiltro() {
         val cat = _categoriaSel.value
         _productosFiltrados.value = if (cat == "Todos") {
-            fuente
+            _fuenteMutable.value
         } else {
-            fuente.filter { it.categoria == cat }
+            _fuenteMutable.value.filter { it.categoria == cat }
         }
     }
 }

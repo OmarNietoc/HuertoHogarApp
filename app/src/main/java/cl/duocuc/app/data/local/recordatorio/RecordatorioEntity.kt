@@ -1,4 +1,4 @@
-package cl.duocuc.app.data.local
+package cl.duocuc.app.data.local.recordatorio
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

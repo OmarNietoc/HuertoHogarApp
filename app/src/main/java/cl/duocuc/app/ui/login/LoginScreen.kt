@@ -1,5 +1,6 @@
 package cl.duocuc.app.ui.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,19 +13,24 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duocuc.app.ui.theme.GrisOscuro
+import androidx.compose.material3.TextFieldDefaults
+
+import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onBack: () -> Unit,
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (String) -> Unit,
     vm: LoginViewModel = viewModel()
 ) {
     val state by vm.ui.collectAsState()
 
     // Navegación reactiva
     LaunchedEffect(state.loggedIn) {
-        if (state.loggedIn) onLoginSuccess()
+        if (state.loggedIn) {
+            onLoginSuccess(state.email)
+        }
     }
 
     // Snackbar opcional
@@ -59,20 +65,38 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = state.email,
                     onValueChange = vm::onEmailChange,
-                    label = { Text("Correo electrónico",color=GrisOscuro) },
+                    placeholder = { Text("Correo electrónico",color=GrisOscuro)},
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
                 )
 
                 OutlinedTextField(
                     value = state.password,
                     onValueChange = vm::onPasswordChange,
-                    label = { Text("Contraseña",color=GrisOscuro) },
+                    placeholder = { Text("Contraseña",color=GrisOscuro) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                    )
                 )
 
                 if (state.error != null) {

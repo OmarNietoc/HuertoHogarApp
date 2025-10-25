@@ -62,28 +62,58 @@ fun RegistrarseScreen(
                 OutlinedTextField(
                     value = state.email,
                     onValueChange = vm::onEmailChange,
-                    label = { Text("Correo electrónico",color=GrisOscuro)},
+                    placeholder = { Text("Correo electrónico",color=GrisOscuro)},
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
                 )
                 OutlinedTextField(
                     value = state.password,
                     onValueChange = vm::onPasswordChange,
-                    label = { Text("Contraseña",color=GrisOscuro) },
+                    placeholder = { Text("Contraseña",color=GrisOscuro) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
                 )
                 OutlinedTextField(
                     value = state.confirm,
                     onValueChange = vm::onConfirmChange,
-                    label = { Text("Confirmar contraseña",color=GrisOscuro) },
+                    placeholder = { Text("Confirmar contraseña",color=GrisOscuro) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = GrisOscuro,
+                        unfocusedTextColor = GrisOscuro,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.White,
+                        unfocusedIndicatorColor = Color.White,
+                        focusedLabelColor = Color.White,
+                        unfocusedLabelColor = Color.White
+                    )
                 )
 
                 if (state.error != null) {
