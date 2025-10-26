@@ -3,8 +3,13 @@ package cl.duocuc.app.ui.principal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cl.duocuc.app.data.local.favoritos.ProductoFavoritoEntity
+import cl.duocuc.app.data.repository.OrderRepository
+import cl.duocuc.app.data.repository.ProductoRepository
 import cl.duocuc.app.model.Producto
 import cl.duocuc.app.model.productosDemo
+import cl.duocuc.app.repository.auth.AuthRepository
+import cl.duocuc.app.repository.auth.FavoritosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +19,16 @@ data class PrincipalUiState(
     val email: String? = null,
     val loading: Boolean = false,
     val error: String? = null,
-    val loggedOut: Boolean = false
+    val loggedOut: Boolean = false,
+
 )
 
-class PrincipalViewModel : ViewModel() {
+class PrincipalViewModel (
+    private val orderRepository: OrderRepository,
+    private val productoRepository: ProductoRepository,
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val favoritosRepository: FavoritosRepository,
+): ViewModel() {
 
     // ---------- Fuente mutable ----------
     private val fuente: List<Producto> = productosDemo
@@ -39,6 +50,120 @@ class PrincipalViewModel : ViewModel() {
     private val _productosFiltrados = MutableStateFlow<List<Producto>>(emptyList())
     val productosFiltrados: StateFlow<List<Producto>> = _productosFiltrados.asStateFlow()
 
+    // ---------- Carrito ----------
+    data class CartItem(
+        val producto: Producto,
+        val cantidad: Int
+    ) {
+        val subtotal: Int get() = producto.precio * cantidad
+    }
+
+    private val _carrito = MutableStateFlow<List<CartItem>>(emptyList())
+    val carrito: StateFlow<List<CartItem>> = _carrito.asStateFlow()
+    private val _cantidadCarrito = MutableStateFlow(0)
+    val cantidadCarrito: StateFlow<Int> = _cantidadCarrito
+
+    init {
+        actualizarContadorCarrito()
+        cargarFavoritos()
+        inicializarProductos()
+    }
+
+    // ---------- Favoritos -----------------
+    private val _favoritosIds = MutableStateFlow<Set<String>>(emptySet())
+    val favoritosIds: StateFlow<Set<String>> = _favoritosIds.asStateFlow()
+
+    fun inicializarProductos() {
+        viewModelScope.launch {
+            // Reinicia la fuente
+            _fuenteMutable.value = productosDemo.map { it.copy(favorito = false) }
+
+            // Carga favoritos de DB
+            val favoritosEntities = favoritosRepository.obtenerTodos()
+            val favoritosSet = favoritosEntities.map { it.id }.toSet()
+            _favoritosIds.value = favoritosSet
+
+            // Marca los productos favoritos
+            _fuenteMutable.value = _fuenteMutable.value.map { p ->
+                p.copy(favorito = favoritosSet.contains(p.id))
+            }
+            aplicarFiltro()
+        }
+    }
+
+    private fun cargarFavoritos() {
+        viewModelScope.launch {
+            val favoritosEntities = favoritosRepository.obtenerTodos()
+            _favoritosIds.value = favoritosEntities.map { it.id }.toSet()
+            // Actualizar la fuente para reflejar favoritos
+            _fuenteMutable.value = _fuenteMutable.value.map { p ->
+                p.copy(favorito = _favoritosIds.value.contains(p.id))
+            }
+            aplicarFiltro()
+        }
+    }
+    fun actualizarContadorCarrito() {
+        viewModelScope.launch {
+            _cantidadCarrito.value = orderRepository.contarProductos()
+        }
+    }
+
+    fun cargarCarrito() {
+        viewModelScope.launch {
+            val entidades = orderRepository.obtenerCarrito()
+            val productos = _fuenteMutable.value
+
+            _carrito.value = entidades.mapNotNull { entidad ->
+                val producto = productos.find { it.id == entidad.productoId }
+                producto?.let {
+                    CartItem(producto = it, cantidad = entidad.cantidad)
+                }
+            }
+        }
+    }
+
+    fun agregarAlCarrito(producto: Producto) {
+        viewModelScope.launch {
+            orderRepository.agregarAlCarrito(
+                productoId = producto.id,
+                nombre = producto.nombre,
+                precioUnitario = producto.precio,
+                cantidad = 1
+            )
+            actualizarContadorCarrito()
+            cargarCarrito()
+        }
+    }
+
+    fun eliminarDelCarrito(productoId: String) {
+        viewModelScope.launch {
+            orderRepository.eliminarDelCarrito(productoId)
+            actualizarContadorCarrito()
+            cargarCarrito()
+        }
+    }
+
+    fun limpiarCarrito() {
+        viewModelScope.launch {
+            orderRepository.limpiarCarrito()
+            actualizarContadorCarrito()
+            cargarCarrito()
+        }
+    }
+
+    fun totalCarrito(): Int {
+        return _carrito.value.sumOf { it.subtotal }
+    }
+
+    fun actualizarCantidadCarrito(productoId: String, nuevaCantidad: Int) {
+        viewModelScope.launch {
+            orderRepository.actualizarCantidadCarrito(productoId, nuevaCantidad)
+            actualizarContadorCarrito()
+            cargarCarrito()
+        }
+    }
+
+
     // ---------- Acciones ----------
     fun setCategoria(cat: String) {
         _categoriaSel.value = cat
@@ -59,11 +184,32 @@ class PrincipalViewModel : ViewModel() {
     }
 
     fun actualizarProductoFavorito(producto: Producto) {
-        // 🔹 actualizar mutable
-        _fuenteMutable.value = _fuenteMutable.value.map {
-            if (it.id == producto.id) producto else it
+        viewModelScope.launch {
+
+            val entity = ProductoFavoritoEntity(
+                id = producto.id,
+                nombre = producto.nombre,
+                categoria = producto.categoria,
+                unid = producto.unid,
+                precio = producto.precio,
+                imagenRes = producto.imagenRes
+            )
+            favoritosRepository.toggleFavorito(entity)
+
+            // 🔹 Actualizar lista local de favoritos
+            val favoritos = favoritosRepository.obtenerTodos().map { it.id }.toSet()
+            _favoritosIds.value = favoritos
+
+            // 🔹 Actualizar la fuente mutable
+            _fuenteMutable.value = _fuenteMutable.value.map { p ->
+                if (p.id == producto.id) {
+                    p.copy(favorito = favoritos.contains(p.id))
+                } else {
+                    p
+                }
+            }
+            aplicarFiltro()
         }
-        aplicarFiltro()
     }
 
     fun refreshHome() {
@@ -74,8 +220,13 @@ class PrincipalViewModel : ViewModel() {
     fun logout() {
         _ui.value = _ui.value.copy(loading = true)
         viewModelScope.launch {
+            authRepository.logout()
             _ui.value = _ui.value.copy(loading = false, loggedOut = true)
         }
+    }
+
+    fun resetLogoutState() {
+        _ui.value = _ui.value.copy(loggedOut = false)
     }
 
     private fun aplicarFiltro() {
@@ -86,4 +237,6 @@ class PrincipalViewModel : ViewModel() {
             _fuenteMutable.value.filter { it.categoria == cat }
         }
     }
+
+
 }

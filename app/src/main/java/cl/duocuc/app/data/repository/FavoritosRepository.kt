@@ -15,5 +15,5 @@ class FavoritosRepository(private val dao: ProductoFavoritoDao) {
         }
     }
 
-    suspend fun esFavorito(id: Int) = dao.esFavorito(id)
+    suspend fun esFavorito(id: String) = dao.esFavorito(id)
 }

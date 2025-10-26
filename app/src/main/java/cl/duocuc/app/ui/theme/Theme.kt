@@ -23,11 +23,11 @@ private val DarkColors = darkColorScheme(
     primary = VerdeEsmeralda,
     onPrimary = Color.White,
     secondary = AmarilloMostaza,
-    onSecondary = Color.Black,
-    background = GrisOscuro,
-    onBackground = FondoSuave,
-    surface = GrisMedio,
-    onSurface = FondoSuave
+    onSecondary = GrisOscuro,
+    background = FondoSuave,
+    onBackground = GrisOscuro,
+    surface = Color.White,
+    onSurface = GrisOscuro
 )
 
 // ==================== Tema principal ====================

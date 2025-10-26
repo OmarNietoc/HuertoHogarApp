@@ -70,9 +70,6 @@ fun RecordatorioScreen(vm: RecordatorioViewModel) {
             ) {
                 Text(if (state.editingId == null) "Guardar" else "Actualizar")
             }
-            OutlinedButton(onClick = { vm.onNuevo(); focus.clearFocus() }, enabled = !state.loading) {
-                Text("Nuevo")
-            }
         }
 
         if (state.error != null) {

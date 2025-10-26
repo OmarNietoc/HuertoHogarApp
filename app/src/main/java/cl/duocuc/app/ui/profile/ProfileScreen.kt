@@ -65,8 +65,6 @@ fun ProfileScreen(vm: ProfileViewModel) {
         ) {
             Text("Correo: ${ui.email ?: "No disponible"}")
             Text("UID: ${ui.uid ?: "No disponible"}")
-            Text("Nombre: ${ui.displayName ?: "No disponible"}")
-
             if (ui.lastSavedPhoto != null) {
                 Image(
                     painter = rememberAsyncImagePainter(ui.lastSavedPhoto),

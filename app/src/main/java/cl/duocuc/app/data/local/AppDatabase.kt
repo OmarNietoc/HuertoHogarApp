@@ -6,18 +6,23 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import cl.duocuc.app.data.local.favoritos.ProductoFavoritoEntity
 import cl.duocuc.app.data.local.favoritos.ProductoFavoritoDao
+import cl.duocuc.app.data.local.order.OrderItemDao
 import cl.duocuc.app.data.local.productos.ProductoDao
 import cl.duocuc.app.data.local.productos.ProductoEntity
 import cl.duocuc.app.data.local.recordatorio.RecordatorioEntity
 import cl.duocuc.app.data.local.recordatorio.ReminderDao
+import cl.duocuc.app.data.local.order.OrderItemEntity
+
+
 
 @Database(
     entities = [
         RecordatorioEntity::class,
         ProductoEntity::class,
-        ProductoFavoritoEntity::class // 👈 Añadida nueva entidad
+        ProductoFavoritoEntity::class, // nueva entidad
+        OrderItemEntity::class
     ],
-    version = 2, // Aumenta la versión al cambiar entidades
+    version = 5, // Aumenta la versión al cambiar entidades
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -26,6 +31,9 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productoDao(): ProductoDao
     abstract fun productoFavoritoDao(): ProductoFavoritoDao // Nuevo DAO
+    abstract fun orderItemDao() : OrderItemDao
+
+
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

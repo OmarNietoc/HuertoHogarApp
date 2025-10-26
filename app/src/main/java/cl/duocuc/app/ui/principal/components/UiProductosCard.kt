@@ -28,17 +28,19 @@ import cl.duocuc.app.model.Producto
 fun UiProductosCard(
     producto: Producto,
     onAgregar: (Producto) -> Unit,
-    onToggleFavorito: () -> Unit
+    onToggleFavorito: (Producto) -> Unit
 ) {
     var agregado by remember { mutableStateOf(false) }
-    var esFavorito by remember { mutableStateOf(producto.favorito) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(340.dp),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White // Fondo blanco explícito
+        )
     ) {
         Column(
             modifier = Modifier
@@ -81,19 +83,16 @@ fun UiProductosCard(
 
                 // ❤️ Botón favorito
                 IconButton(
-                    onClick = {
-                        esFavorito = !esFavorito
-                        onToggleFavorito()  // ✅ se ejecuta sin parámetros
-                    },
+                    onClick = { onToggleFavorito(producto) },
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
                     Icon(
-                        imageVector = if (esFavorito)
+                        imageVector = if (producto.favorito)
                             Icons.Filled.Favorite
                         else
                             Icons.Outlined.FavoriteBorder,
                         contentDescription = "Favorito",
-                        tint = if (esFavorito)
+                        tint = if (producto.favorito)
                             Color.Red
                         else
                             MaterialTheme.colorScheme.onSurface
@@ -145,7 +144,7 @@ fun UiProductosCard(
 
             Button(
                 onClick = {
-                    agregado = !agregado
+                    //agregado = !agregado
                     onAgregar(producto)
                 },
                 interactionSource = interactionSource,
@@ -159,10 +158,156 @@ fun UiProductosCard(
                     .animateContentSize()
             ) {
                 Text(
-                    if (agregado) "Agregado ✅" else "Agregar al carrito",
+                    "Agregar al carrito",
                     style = MaterialTheme.typography.labelLarge
                 )
             }
+        }
+    }
+}
+
+//Componente especializado para el Carrito
+@Composable
+fun ProductoCardCarrito(
+    producto: Producto,
+    cantidad: Int,
+    onCantidadChange: (Int) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp), // Altura reducida para el carrito
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White // Fondo blanco explícito
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen del producto
+            Image(
+                painter = painterResource(producto.imagenRes),
+                contentDescription = producto.nombre,
+                modifier = Modifier
+                    .size(70.dp)
+                    .padding(end = 12.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            // Información del producto
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = producto.nombre,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    text = producto.categoria.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    text = "$${producto.precio} / ${producto.unid}",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                // Selector de cantidad
+                CantidadSelector(
+                    cantidad = cantidad,
+                    onCantidadChange = onCantidadChange,
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                )
+            }
+
+            // Precio total del item
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = "$${producto.precio * cantidad}",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "Subtotal",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+//Componente para selector de cantidad
+@Composable
+fun CantidadSelector(
+    cantidad: Int,
+    onCantidadChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Botón disminuir
+        Button(
+            onClick = { onCantidadChange(cantidad - 1) },
+            modifier = Modifier.size(32.dp),
+            colors = ButtonDefaults.buttonColors(
+                contentColor = MaterialTheme.colorScheme.secondary,
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Text(
+                "-",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+
+            )
+        }
+
+        // Cantidad actual
+        Text(
+            text = "$cantidad",
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+
+        // Botón aumentar
+        Button(
+            onClick = { onCantidadChange(cantidad + 1) },
+            modifier = Modifier.size(32.dp),
+            colors = ButtonDefaults.buttonColors(
+                contentColor = MaterialTheme.colorScheme.secondary,
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Text(
+                "+",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
         }
     }
 }

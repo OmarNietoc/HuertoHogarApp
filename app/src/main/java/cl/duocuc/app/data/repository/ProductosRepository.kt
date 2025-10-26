@@ -2,7 +2,6 @@ package cl.duocuc.app.data.repository
 
 import cl.duocuc.app.data.local.AppDatabase
 import cl.duocuc.app.data.local.favoritos.ProductoFavoritoEntity
-import cl.duocuc.app.data.local.productos.ProductoEntity
 import cl.duocuc.app.data.mappers.toModel
 import cl.duocuc.app.model.Producto
 import kotlinx.coroutines.Dispatchers
@@ -24,17 +23,17 @@ class ProductoRepository(private val db: AppDatabase) {
             if (producto.favorito) {
                 productoFavoritoDao.insertar(
                     ProductoFavoritoEntity(
-                        id = producto.id.hashCode(),
+                        id = producto.id,
                         nombre = producto.nombre,
                         categoria = producto.categoria,
-                        precio = producto.precio.toDouble(),
+                        precio = producto.precio,
                         unid = producto.unid,
                         imagenRes = producto.imagenRes,
                         oferta = producto.oferta
                     )
                 )
             } else {
-                productoFavoritoDao.eliminarPorId(producto.id.hashCode())
+                productoFavoritoDao.eliminarPorId(producto.id)
             }
         }
     }
