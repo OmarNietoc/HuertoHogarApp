@@ -20,6 +20,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import cl.duocuc.app.model.Producto
@@ -151,11 +153,11 @@ fun UiProductosCard(
                 colors = ButtonDefaults.buttonColors(containerColor = colorFondo),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(48.dp)
                     .graphicsLayer {
                         scaleX = escala
                         scaleY = escala
                     }
-                    .animateContentSize()
             ) {
                 Text(
                     "Agregar al carrito",
@@ -176,11 +178,11 @@ fun ProductoCardCarrito(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp), // Altura reducida para el carrito
+            .height(160.dp), // Un poco más de altura para mejor distribución
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White // Fondo blanco explícito
+            containerColor = Color.White
         )
     ) {
         Row(
@@ -190,19 +192,21 @@ fun ProductoCardCarrito(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen del producto
+            // Columna 1: Imagen
             Image(
                 painter = painterResource(producto.imagenRes),
                 contentDescription = producto.nombre,
                 modifier = Modifier
-                    .size(70.dp)
-                    .padding(end = 12.dp),
+                    .size(60.dp) // Imagen un poco más pequeña
+                    .padding(end = 8.dp),
                 contentScale = ContentScale.Crop
             )
 
-            // Información del producto
+            // Columna 2: Información del producto y selector
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -215,46 +219,64 @@ fun ProductoCardCarrito(
                 Spacer(Modifier.height(4.dp))
 
                 Text(
-                    text = producto.categoria.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                Text(
                     text = "$${producto.precio} / ${producto.unid}",
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
                 )
 
                 Spacer(Modifier.height(8.dp))
 
-                // Selector de cantidad
-                CantidadSelector(
-                    cantidad = cantidad,
-                    onCantidadChange = onCantidadChange,
-                    modifier = Modifier.fillMaxWidth(0.8f)
-                )
+                // Selector de cantidad CENTRADO
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    CantidadSelector(
+                        cantidad = cantidad,
+                        onCantidadChange = onCantidadChange,
+                        modifier = Modifier
+                    )
+                }
             }
 
-            // Precio total del item
+            // Columna 3: Precio y botón eliminar
             Column(
-                horizontalAlignment = Alignment.End
+                modifier = Modifier.wrapContentWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "$${producto.precio * cantidad}",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                )
-                Text(
-                    text = "Subtotal",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                // Precio total
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "$${producto.precio * cantidad}",
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        text = "Subtotal",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Botón eliminar
+                IconButton(
+                    onClick = { onCantidadChange(0) }, // Elimina el producto
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Eliminar del carrito",
+                        tint = Color.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
 }
-//Componente para selector de cantidad
+
+//Componente para selector de cantidad - VERSIÓN COMPACTA
 @Composable
 fun CantidadSelector(
     cantidad: Int,
@@ -263,15 +285,23 @@ fun CantidadSelector(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Etiqueta
+        Text(
+            text = "Cantidad:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+
         // Botón disminuir
         Button(
             onClick = { onCantidadChange(cantidad - 1) },
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(36.dp),
+            shape = CircleShape,
             colors = ButtonDefaults.buttonColors(
-                contentColor = MaterialTheme.colorScheme.secondary,
                 containerColor = MaterialTheme.colorScheme.primary
             ),
             contentPadding = PaddingValues(0.dp)
@@ -281,7 +311,6 @@ fun CantidadSelector(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
-
             )
         }
 
@@ -295,9 +324,9 @@ fun CantidadSelector(
         // Botón aumentar
         Button(
             onClick = { onCantidadChange(cantidad + 1) },
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(36.dp),
+            shape = CircleShape,
             colors = ButtonDefaults.buttonColors(
-                contentColor = MaterialTheme.colorScheme.secondary,
                 containerColor = MaterialTheme.colorScheme.primary
             ),
             contentPadding = PaddingValues(0.dp)

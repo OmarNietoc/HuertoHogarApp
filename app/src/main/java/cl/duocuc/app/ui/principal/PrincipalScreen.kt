@@ -83,7 +83,7 @@ private fun BottomBar(
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
-    NavigationBar {
+    NavigationBar (containerColor = Color.White){
         bottomItems.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
@@ -110,14 +110,16 @@ private fun BottomBar(
                         BadgedBox(
                             badge = { Badge { Text("$cantidadCarrito") } }
                         ) {
-                            Icon(item.icon, contentDescription = item.title)
+                            Icon(item.icon, contentDescription = item.title,tint = Color.Black)
                         }
                     } else {
-                        Icon(item.icon, contentDescription = item.title)
+                        Icon(item.icon, contentDescription = item.title,tint = Color.Black)
                     }
                 },
-                label = { Text(item.title) },
-                colors = NavigationBarItemDefaults.colors()
+                label = { Text(item.title,color = Color.Black) },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.LightGray.copy(alpha = 0.2f)
+                )
             )
         }
     }
@@ -263,19 +265,17 @@ fun PrincipalScreen(
                                 )
                             }
                         }
+
                         // Grilla de productos
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 180.dp),
+                        LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                            contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
                         ) {
                             items(productos, key = { it.id }) { producto ->
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .aspectRatio(0.6f)
                                         .animateContentSize()
                                 ) {
                                     UiProductosCard(
@@ -287,12 +287,8 @@ fun PrincipalScreen(
                                                 )
                                             }},
                                         onToggleFavorito = {
-                                            // 🔹 Aquí creamos el nuevo producto con favorito toggled
                                             val nuevoProducto = producto.copy(favorito = !producto.favorito)
-
-                                            // repo + ViewModel en coroutine
                                             scope.launch {
-
                                                 vm.actualizarProductoFavorito(nuevoProducto)
                                             }
                                         }
@@ -300,7 +296,6 @@ fun PrincipalScreen(
                                 }
                             }
                         }
-
                     }
                 }
 
@@ -339,11 +334,10 @@ fun PrincipalScreen(
                         }
                     }
                     else{
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 180.dp),
-                            contentPadding = PaddingValues(16.dp),
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            contentPadding = PaddingValues(16.dp)
                         ) {
                             items(soloFavoritos, key = { it.id }) { producto ->
                                 UiProductosCard(
@@ -359,10 +353,7 @@ fun PrincipalScreen(
                             }
                         }
                     }
-
                 }
-
-
 
                 // CARRITO
                 composable(BottomItem.Cart.route) {
@@ -381,20 +372,20 @@ fun PrincipalScreen(
                                 color = Color.White,
                                 shape = MaterialTheme.shapes.medium,
                                 modifier = Modifier
-                                    .fillMaxWidth(0.8f) // Ocupa el 80% del ancho para mejor apariencia
-                                    .padding(16.dp), // Padding externo
+                                    .fillMaxWidth(0.8f)
+                                    .padding(16.dp),
                                 shadowElevation = 4.dp
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(24.dp), // Padding interno para el texto
+                                        .padding(24.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = "Tu carrito está vacío 🛒",
                                         style = MaterialTheme.typography.bodyLarge,
-                                        textAlign = TextAlign.Center // Centra el texto horizontalmente
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
@@ -411,11 +402,18 @@ fun PrincipalScreen(
                                 Text("Carrito de compras", style = MaterialTheme.typography.titleLarge)
                                 Spacer(Modifier.height(8.dp))
 
-                                // Lista de productos con espacio para el total fijo
+                                // Lista de productos SIMPLIFICADA
                                 LazyColumn(
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .navigationBarsPadding(),
                                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    contentPadding = PaddingValues(bottom = 120.dp) // Espacio para el total fijo
+                                    contentPadding = PaddingValues(
+                                        bottom = 160.dp,
+                                        top = 8.dp,
+                                        start = 8.dp,
+                                        end = 8.dp
+                                    )
                                 ) {
                                     items(carrito) { item ->
                                         Surface(
@@ -424,45 +422,17 @@ fun PrincipalScreen(
                                             modifier = Modifier.fillMaxWidth(),
                                             shadowElevation = 4.dp
                                         ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                // Card del producto con selector de cantidad
-                                                Box(modifier = Modifier.weight(1f)) {
-                                                    ProductoCardCarrito(
-                                                        producto = item.producto,
-                                                        cantidad = item.cantidad,
-                                                        onCantidadChange = { nuevaCantidad ->
-                                                            if (nuevaCantidad > 0) {
-                                                                vm.actualizarCantidadCarrito(item.producto.id, nuevaCantidad)
-                                                            } else {
-                                                                vm.eliminarDelCarrito(item.producto.id)
-                                                            }
-                                                        }
-                                                    )
-                                                }
-
-                                                Spacer(modifier = Modifier.width(8.dp))
-
-                                                // Ícono de eliminar
-                                                IconButton(
-                                                    onClick = {
+                                            ProductoCardCarrito(
+                                                producto = item.producto,
+                                                cantidad = item.cantidad,
+                                                onCantidadChange = { nuevaCantidad ->
+                                                    if (nuevaCantidad > 0) {
+                                                        vm.actualizarCantidadCarrito(item.producto.id, nuevaCantidad)
+                                                    } else {
                                                         vm.eliminarDelCarrito(item.producto.id)
-                                                    },
-                                                    modifier = Modifier.size(48.dp)
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Outlined.Delete,
-                                                        contentDescription = "Eliminar del carrito",
-                                                        tint = Color.Red,
-                                                        modifier = Modifier.size(24.dp)
-                                                    )
+                                                    }
                                                 }
-                                            }
+                                            )
                                         }
                                     }
                                 }
