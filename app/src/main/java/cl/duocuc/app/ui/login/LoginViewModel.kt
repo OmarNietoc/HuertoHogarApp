@@ -1,6 +1,6 @@
 package cl.duocuc.app.ui.login
 
-import android.util.Patterns
+// Borra la importación de android.util.Patterns si la tienes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duocuc.app.model.User
@@ -17,7 +17,7 @@ data class LoginUiState(
     val error: String? = null,
     val loggedIn: Boolean = false,
     val user: User? = null,
-    val message: String? = null   // para Snackbar one-shot (opcional)
+    val message: String? = null
 )
 
 class LoginViewModel(
@@ -30,12 +30,19 @@ class LoginViewModel(
     fun onEmailChange(v: String)    = _ui.update { it.copy(email = v, error = null, message = null) }
     fun onPasswordChange(v: String) = _ui.update { it.copy(password = v, error = null, message = null) }
 
+    // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
     private fun validar(): String? {
         val s = _ui.value
-        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
+
+        // Usamos Regex de Kotlin en vez de Patterns de Android
+        // Esto permite que el test funcione sin emulador
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+
+        if (!emailRegex.matches(s.email)) return "Email inválido"
         if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
         return null
     }
+    // ---------------------------------
 
     fun submit() {
         val err = validar()
