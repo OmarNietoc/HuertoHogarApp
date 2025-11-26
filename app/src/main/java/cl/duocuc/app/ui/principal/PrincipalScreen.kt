@@ -147,6 +147,7 @@ fun PrincipalScreen(
     val scope = rememberCoroutineScope()
     val orderRepository = remember { OrderRepository(AppDatabase.get(context)) }
     val cantidadCarrito by vm.cantidadCarrito.collectAsState()
+    val categorias by vm.categorias.collectAsState()
 
     LaunchedEffect(state.loggedOut) {
         if (state.loggedOut) {
@@ -249,8 +250,8 @@ fun PrincipalScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(vertical = 4.dp)
                         ) {
-                            items(vm.categorias.size) { idx ->
-                                val cat = vm.categorias[idx]
+                            items(categorias.size) { idx ->
+                                val cat = categorias[idx]
                                 FilterChip(
                                     selected = categoriaSel == cat,
                                     onClick = { vm.setCategoria(cat) },

@@ -7,7 +7,6 @@ import cl.duocuc.app.data.local.favoritos.ProductoFavoritoEntity
 import cl.duocuc.app.data.repository.OrderRepository
 import cl.duocuc.app.data.repository.ProductoRepository
 import cl.duocuc.app.model.Producto
-import cl.duocuc.app.model.productosDemo
 import cl.duocuc.app.repository.auth.AuthRepository
 import cl.duocuc.app.repository.auth.FavoritosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,14 +30,13 @@ class PrincipalViewModel (
 ): ViewModel() {
 
     // ---------- Fuente mutable ----------
-    private val fuente: List<Producto> = productosDemo
-    private val _fuenteMutable = MutableStateFlow(fuente)  // la fuente "inmutable" original queda aquí
+    private val _fuenteMutable = MutableStateFlow<List<Producto>>(emptyList())
     private val fuenteFlow: StateFlow<List<Producto>> = _fuenteMutable.asStateFlow()
     val todosProductos: StateFlow<List<Producto>> = _fuenteMutable.asStateFlow()
 
     // ---------- Categorías ----------
-    val categorias: List<String> = listOf("Todos") +
-            _fuenteMutable.value.map { it.categoria }.distinct()
+    private val _categorias = MutableStateFlow<List<String>>(listOf("Todos"))
+    val categorias: StateFlow<List<String>> = _categorias.asStateFlow()
 
     // ---------- Estado general ----------
     private val _ui = MutableStateFlow(PrincipalUiState())
@@ -75,19 +73,40 @@ class PrincipalViewModel (
 
     fun inicializarProductos() {
         viewModelScope.launch {
-            // Reinicia la fuente
-            _fuenteMutable.value = productosDemo.map { it.copy(favorito = false) }
+            _ui.value = _ui.value.copy(loading = true)
+            try {
+                // Fetch from repository (network)
+                val productosRemotos = productoRepository.obtenerProductos()
+                
+                if (productosRemotos.isNotEmpty()) {
+                    _fuenteMutable.value = productosRemotos
+                } else {
+                    // Fallback to demo data if network fails or returns empty
+                    _fuenteMutable.value = emptyList()
+                }
 
-            // Carga favoritos de DB
-            val favoritosEntities = favoritosRepository.obtenerTodos()
-            val favoritosSet = favoritosEntities.map { it.id }.toSet()
-            _favoritosIds.value = favoritosSet
+                // Update categories from loaded products
+                _categorias.value = listOf("Todos") + 
+                    _fuenteMutable.value.map { it.categoria }.distinct()
 
-            // Marca los productos favoritos
-            _fuenteMutable.value = _fuenteMutable.value.map { p ->
-                p.copy(favorito = favoritosSet.contains(p.id))
+                // Carga favoritos de DB
+                val favoritosEntities = favoritosRepository.obtenerTodos()
+                val favoritosSet = favoritosEntities.map { it.id }.toSet()
+                _favoritosIds.value = favoritosSet
+
+                // Marca los productos favoritos
+                _fuenteMutable.value = _fuenteMutable.value.map { p ->
+                    p.copy(favorito = favoritosSet.contains(p.id))
+                }
+                aplicarFiltro()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Fallback on error
+                _fuenteMutable.value = emptyList()
+                _categorias.value = listOf("Todos")
+            } finally {
+                _ui.value = _ui.value.copy(loading = false)
             }
-            aplicarFiltro()
         }
     }
 

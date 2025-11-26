@@ -10,12 +10,13 @@ data class Producto(
     val descripcion: String,
     val precio: Int,
     val categoria: String,
-    @DrawableRes val imagenRes: Int,
+    @DrawableRes val imagenRes: Int = R.mipmap.ic_launcher,
+    val imagenBase64: String? = null,
     val unid: String,
     val oferta: String? = null,
     var favorito: Boolean = false
 )
-
+/*
 val productosDemo = listOf(
             Producto(
                 id = "FR001",
@@ -101,4 +102,4 @@ val productosDemo = listOf(
         imagenRes = R.drawable.milk,
         unid = "L"
     )
-)
+)*/

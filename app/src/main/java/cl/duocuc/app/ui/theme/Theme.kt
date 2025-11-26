@@ -36,7 +36,8 @@ fun HuertoHogarTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) DarkColors else LightColors
+    // Force LightColors regardless of darkTheme setting
+    val colors = LightColors
 
     MaterialTheme(
         colorScheme = colors,
