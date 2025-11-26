@@ -5,10 +5,10 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-class FirebaseAuthDataSource(
+open class FirebaseAuthDataSource(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
-    suspend fun signIn(email: String, pass: String): FirebaseUser? =
+    open suspend fun signIn(email: String, pass: String): FirebaseUser? =
         suspendCancellableCoroutine { cont ->
             auth.signInWithEmailAndPassword(email, pass)
                 .addOnSuccessListener { cont.resume(it.user) }
@@ -16,14 +16,14 @@ class FirebaseAuthDataSource(
         }
 
 
-    suspend fun signUp(email: String, pass: String): FirebaseUser? =
+    open suspend fun signUp(email: String, pass: String): FirebaseUser? =
         suspendCancellableCoroutine { cont ->
             auth.createUserWithEmailAndPassword(email, pass)
                 .addOnSuccessListener { cont.resume(it.user) }
                 .addOnFailureListener { cont.resume(null) }
         }
 
-    suspend fun sendPasswordReset(email: String): Boolean =
+    open suspend fun sendPasswordReset(email: String): Boolean =
         suspendCancellableCoroutine { cont ->
             auth.sendPasswordResetEmail(email)
                 .addOnSuccessListener { cont.resume(true) }
@@ -31,6 +31,6 @@ class FirebaseAuthDataSource(
         }
 
 
-    fun currentUser(): FirebaseUser? = auth.currentUser
-    fun signOut() = auth.signOut()
+    open fun currentUser(): FirebaseUser? = auth.currentUser
+    open fun signOut() = auth.signOut()
 }
