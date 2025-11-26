@@ -108,4 +108,14 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
     implementation(libs.gson)
+
+    // MockK: Para simular el Repositorio y que no pida internet real
+    testImplementation("io.mockk:mockk:1.13.8")
+
+    // Kotest: Para usar el formato "StringSpec" que usa el profe
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+
+    // Coroutines Test: Necesario porque tu LoginViewModel usa viewModelScope.launch
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
