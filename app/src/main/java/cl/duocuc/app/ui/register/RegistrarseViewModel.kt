@@ -1,6 +1,6 @@
 package cl.duocuc.app.ui.register
 
-import android.util.Patterns
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duocuc.app.model.User
@@ -34,9 +34,16 @@ class RegisterViewModel(
 
     private fun validar(): String? {
         val s = _ui.value
-        if (!Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) return "Email inválido"
+
+        // Usamos Regex de Kotlin para que el test funcione sin Android
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+
+        if (!emailRegex.matches(s.email)) return "Email inválido"
         if (s.password.length < 6) return "La clave debe tener al menos 6 caracteres"
+
+        // Esta validación es EXCLUSIVA de Register, hay que probarla bien:
         if (s.password != s.confirm) return "Las claves no coinciden"
+
         return null
     }
 
