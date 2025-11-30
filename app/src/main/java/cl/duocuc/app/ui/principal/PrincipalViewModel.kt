@@ -233,7 +233,7 @@ class PrincipalViewModel (
 
     fun refreshHome() {
         _categoriaSel.value = "Todos"
-        cargarProductos()
+        inicializarProductos()
     }
 
     fun logout() {

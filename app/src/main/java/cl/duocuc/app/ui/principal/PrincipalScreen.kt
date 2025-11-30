@@ -231,9 +231,9 @@ fun PrincipalScreen(
             ) {
                 // HOME
                 composable(route = BottomItem.Home.route) {
-                    // Carga inicial en el primer ingreso
+                    // Carga inicial en el primer ingreso y cada vez que se vuelve a Home
                     LaunchedEffect(Unit) {
-                        if (productos.isEmpty()) vm.cargarProductos()
+                        vm.inicializarProductos()
                     }
 
                     Column(
@@ -302,6 +302,9 @@ fun PrincipalScreen(
 
                 // FAVORITOS
                 composable(BottomItem.Favs.route) {
+                    LaunchedEffect(Unit) {
+                        vm.inicializarProductos()
+                    }
 
                     val todos by vm.todosProductos.collectAsState()
                     val soloFavoritos = todos.filter { it.favorito }
@@ -361,6 +364,7 @@ fun PrincipalScreen(
                     val carrito by vm.carrito.collectAsState()
                     val total = vm.totalCarrito()
                     LaunchedEffect(Unit) {
+                        vm.inicializarProductos()
                         vm.cargarCarrito()
                     }
 

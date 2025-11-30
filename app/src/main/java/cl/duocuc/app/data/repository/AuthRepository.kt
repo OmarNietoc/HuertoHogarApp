@@ -1,9 +1,11 @@
 package cl.duocuc.app.repository.auth
 
 import cl.duocuc.app.model.User
-import cl.duocuc.app.data.network.ShoppyApiService // Asegúrate que este import sea correcto
+import cl.duocuc.app.data.network.ShoppyApiService
 import cl.duocuc.app.data.network.RetrofitClient
-import cl.duocuc.app.data.network.dto.UserRequestDto // Asegúrate del import
+import cl.duocuc.app.data.network.dto.LoginRequest
+import cl.duocuc.app.data.network.dto.RegisterRequest
+import cl.duocuc.app.data.network.dto.UserRequestDto
 import retrofit2.HttpException
 import kotlin.String
 
@@ -17,28 +19,24 @@ class AuthRepository(
     suspend fun login(email: String, pass: String): User? {
         val fu = ds.signIn(email, pass) ?: return null
 
-        // Sync with Shoppy
+        // Login en Shoppy para obtener token y compatibilidad con endpoints protegidos
         try {
-            apiService.getUserByEmail(email)
-        } catch (e: HttpException) {
-            // Si es 404 (No encontrado), lo creamos
-            if (e.code() == 404) {
-                try {
-                    val userDto = UserRequestDto(
-                        name = "Usuario",
+            val loginResp = apiService.login(LoginRequest(email = email, password = pass))
+            RetrofitClient.setAuthToken(loginResp.token)
+
+            // Verifica existencia; si no existe, registra con rol USER
+            val userResp = apiService.getUserByEmail(email)
+            if (!userResp.isSuccessful) {
+                apiService.register(
+                    RegisterRequest(
+                        name = fu.displayName ?: "Usuario",
                         email = email,
                         password = pass,
                         role = 2L,
                         status = 1,
-                        imagen = null,
                         firebaseId = fu.uid
                     )
-                    apiService.addUser(userDto)
-                } catch (createError: Exception) {
-                    createError.printStackTrace()
-                }
-            } else {
-                e.printStackTrace()
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -53,16 +51,19 @@ class AuthRepository(
 
         // Sync with Shoppy
         try {
-            val userDto = UserRequestDto(
-                name = "Usuario",
-                email = email,
-                password = pass,
-                role = 2L,
-                status = 1,
-                imagen = null,
-                firebaseId = fu.uid
+            apiService.register(
+                RegisterRequest(
+                    name = fu.displayName ?: "Usuario",
+                    email = email,
+                    password = pass,
+                    role = 2L,
+                    status = 1,
+                    firebaseId = fu.uid
+                )
             )
-            apiService.addUser(userDto)
+            // Login inmediato para obtener token
+            val loginResp = apiService.login(LoginRequest(email = email, password = pass))
+            RetrofitClient.setAuthToken(loginResp.token)
         } catch (e: Exception) {
             e.printStackTrace()
         }

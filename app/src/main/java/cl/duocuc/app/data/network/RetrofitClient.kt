@@ -8,6 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = BuildConfig.API_BASE_URL
+    @Volatile
+    private var authToken: String? = null
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -15,6 +17,16 @@ object RetrofitClient {
 
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .addInterceptor { chain ->
+            val original = chain.request()
+            val token = authToken
+            val req = if (!token.isNullOrBlank()) {
+                original.newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+            } else original
+            chain.proceed(req)
+        }
         .build()
 
     val apiService: ShoppyApiService by lazy {
@@ -24,5 +36,9 @@ object RetrofitClient {
             .client(httpClient)
             .build()
             .create(ShoppyApiService::class.java)
+    }
+
+    fun setAuthToken(token: String?) {
+        authToken = token
     }
 }
